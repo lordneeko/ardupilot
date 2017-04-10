@@ -645,3 +645,7 @@
 #ifndef TOY_MODE_ENABLED
 #define TOY_MODE_ENABLED DISABLED
 #endif
+
+#ifndef CH_MODE_DEFAULT
+#define CH_MODE_DEFAULT CH_5
+#endif
