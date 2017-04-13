@@ -577,6 +577,9 @@ public:
 
     // Additional pilot velocity items
     AP_Int16    pilot_speed_dn;
+
+    // temperature calibration handling
+    AP_TempCalibration temp_calibration;
 };
 
 extern const AP_Param::Info        var_info[];
