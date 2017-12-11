@@ -11,7 +11,7 @@
 #if CONFIG_HAL_BOARD == HAL_BOARD_PX4
 #include <board_config.h>
 #endif
-#include "AP_Radio_cc2500.h"
+#include "AP_Radio_beken.h"
 #include <utility>
 #include <stdio.h>
 #include <StorageManager/StorageManager.h>
@@ -291,7 +291,7 @@ void AP_Radio_beken::trigger_timeout_event(void *arg)
     chSysUnlockFromISR();
 }
 
-void AP_Radio_cc2500::start_recv_bind(void)
+void AP_Radio_beken::start_recv_bind(void)
 {
     protocolState = STATE_BIND_TUNING;
     chan_count = 0;

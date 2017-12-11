@@ -10,7 +10,7 @@
 extern const AP_HAL::HAL& hal;
 
 // constructor
-Radio_Beken::Radio_CC2500(AP_HAL::OwnPtr<AP_HAL::SPIDevice> _dev) :
+Radio_Beken::Radio_Beken(AP_HAL::OwnPtr<AP_HAL::SPIDevice> _dev) :
     dev(std::move(_dev))
 {}
 
