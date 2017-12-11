@@ -176,46 +176,87 @@ bool AP_Radio_beken::send(const uint8_t *pkt, uint16_t len)
     return false;
 }
 
-/*
-const AP_Radio_beken::config AP_Radio_beken::radio_config[] = {
-    {CC2500_02_IOCFG0,   0x01}, // GD0 high on RXFIFO filled or end of packet
-    {CC2500_17_MCSM1,    0x0C}, // stay in RX on packet receive, CCA always, TX -> IDLE
-    {CC2500_18_MCSM0,    0x18}, // XOSC expire 64, cal on IDLE -> TX or RX
-    {CC2500_06_PKTLEN,   0x1E}, // packet length 30
-    {CC2500_07_PKTCTRL1, 0x04}, // enable RSSI+LQI, no addr check, no autoflush, PQT=0
-    {CC2500_08_PKTCTRL0, 0x01}, // var length mode, no CRC, FIFO enable, no whitening
-    {CC2500_3E_PATABLE,  0xFF}, // ?? what are we doing to PA table here?
-    {CC2500_0B_FSCTRL1,  0x0A}, // IF=253.90625kHz assuming 26MHz crystal
-    {CC2500_0C_FSCTRL0,  0x00}, // freqoffs = 0
-    {CC2500_0D_FREQ2,    0x5C}, // freq control high
-    {CC2500_0E_FREQ1,    0x76}, // freq control middle
-    {CC2500_0F_FREQ0,    0x27}, // freq control low
-    {CC2500_10_MDMCFG4,  0x7B}, // data rate control
-    {CC2500_11_MDMCFG3,  0x61}, // data rate control
-    {CC2500_12_MDMCFG2,  0x13}, // 30/32 sync word bits, no manchester, GFSK, DC filter enabled
-    {CC2500_13_MDMCFG1,  0x23}, // chan spacing exponent 3, preamble 4 bytes, FEC disabled
-    {CC2500_14_MDMCFG0,  0x7A}, // chan spacing 299.926757kHz for 26MHz crystal
-    {CC2500_15_DEVIATN,  0x51}, // modem deviation 25.128906kHz for 26MHz crystal
-    {CC2500_19_FOCCFG,   0x16}, // frequency offset compensation
-    {CC2500_1A_BSCFG,    0x6C}, // bit sync config
-    {CC2500_1B_AGCCTRL2, 0x03}, // target amplitude 33dB
-    {CC2500_1C_AGCCTRL1, 0x40}, // AGC control 2
-    {CC2500_1D_AGCCTRL0, 0x91}, // AGC control 0
-    {CC2500_21_FREND1,   0x56}, // frontend config1
-    {CC2500_22_FREND0,   0x10}, // frontend config0
-    {CC2500_23_FSCAL3,   0xA9}, // frequency synth cal3
-    {CC2500_24_FSCAL2,   0x0A}, // frequency synth cal2
-    {CC2500_25_FSCAL1,   0x00}, // frequency synth cal1
-    {CC2500_26_FSCAL0,   0x11}, // frequency synth cal0
-    //{CC2500_29_FSTEST,   0x59}, disabled FSTEST write
-    {CC2500_2C_TEST2,    0x88}, // test settings
-    {CC2500_2D_TEST1,    0x31}, // test settings
-    {CC2500_2E_TEST0,    0x0B}, // test settings
-    {CC2500_03_FIFOTHR,  0x07}, // TX fifo threashold 33, RX fifo threshold 32
-    {CC2500_09_ADDR,     0x00}, // device address 0 (broadcast)
-};
-*/
+// (Lets make it one radio interface for both projects)
+#if RADIO_BEKEN
+#define PLL_SPEED { BK2425_R1_12, 0x00,0x12,0x73,0x05 } // 0x00127305ul, // PLL locking time 130us compatible with nRF24L01;
 
+const uint8_t Bank1_RegTable[ITX_MAX][IREG_MAX][5]={
+	// (TX_SPEED == 250u)
+	{
+		{ BK2425_R1_4,  0xf9,0x96,0x8a,0xdb }, // 0xDB8A96f9ul, // REG4 250kbps
+		{ BK2425_R1_5,  0x24,0x06,0x0f,0xb6 }, // 0xB60F0624ul, // REG5 250kbps
+		PLL_SPEED,                                              // REG12
+		{ BK2425_R1_13, 0x36,0xb4,0x80,0x00 }, // 0x36B48000ul, // REG13
+		{ BK2425_R1_4,  0xff,0x96,0x8a,0xdb }, // 0xDB8A96f9ul, // REG4 250kbps
+	},
+	// (TX_SPEED == 1000u)
+	{
+		{ BK2425_R1_4,  0xf9,0x96,0x82,0x1b }, // 0x1B8296f9ul, // REG4 1Mbps
+		{ BK2425_R1_5,  0x24,0x06,0x0f,0xa6 }, // 0xA60F0624ul, // REG5 1Mbps
+		PLL_SPEED,                                              // REG12
+		{ BK2425_R1_13, 0x36,0xb4,0x80,0x00 }, // 0x36B48000ul, // REG13
+		{ BK2425_R1_4,  0xff,0x96,0x82,0x1b }, // 0x1B8296f9ul, // REG4 1Mbps
+	},
+	// (TX_SPEED == 2000u)
+	{
+		{ BK2425_R1_4,  0xf9,0x96,0x82,0xdb }, // 0xdb8296f9ul, // REG4 2Mbps
+		{ BK2425_R1_5,  0x24,0x06,0x0f,0xb6 }, // 0xb60f0624ul, // REG5 2Mbps
+		PLL_SPEED,                                              // REG12
+		{ BK2425_R1_13, 0x36,0xb4,0x80,0x00 }, // 0x36B48000ul, // REG13
+		{ BK2425_R1_4,  0xff,0x96,0x82,0xdb }, // 0xdb8296f9ul, // REG4 2Mbps
+	}
+};
+#endif
+
+static const uint8_t Bank0_Reg6[ITX_MAX][2] = {
+	{BK_RF_SETUP,   0x27}, //  250kbps (6) 0x27=250kbps
+	{BK_RF_SETUP,   0x07}, // 1000kbps (6) 0x07=1Mbps, high gain, high txpower
+	{BK_RF_SETUP,   0x2F}, // 2000kbps (6) 0x2F=2Mbps, high gain, high txpower
+};
+
+static const uint8_t Bank1_Reg14[]=
+{
+0x41,0x20,0x08,0x04,0x81,0x20,0xcf,0xF7,0xfe,0xff,0xff
+};
+
+// Bank0 register initialization value
+static const uint8_t Bank0_Reg[][2]={
+{BK_CONFIG,     BK_CONFIG_EN_CRC | BK_CONFIG_CRCO | BK_CONFIG_PWR_UP | BK_CONFIG_PRIM_RX }, // (0) 0x0F=Rx, PowerUp, crc16, all interrupts enabled
+{BK_EN_AA,      0x00}, // (1) 0x00=No auto acknowledge packets on all 6 data pipes (0..5)
+{BK_EN_RXADDR,  0x01}, // (2) 0x01=1 or 2 out of 6 data pipes enabled (pairing heartbeat and my tx)
+{BK_SETUP_AW,   0x03}, // (3) 0x03=5 byte address width
+{BK_SETUP_RETR, 0x00}, // (4) 0x00=No retransmissions
+{BK_RF_CH,      0x17}, // (5) 0x17=2423Mhz default frequency
+// Comment in Beken code says that 0x0F or 0x2F=2Mbps; 0x07=1Mbps; 0x27=250Kbps
+#if (TX_SPEED == 2000)
+{BK_RF_SETUP,   0x2F}, // (6) 0x2F=2Mbps, high gain, high txpower
+#elif (TX_SPEED == 1000)
+{BK_RF_SETUP,   0x07}, // (6) 0x07=1Mbps, high gain, high txpower
+#elif (TX_SPEED == 250)
+{BK_RF_SETUP,   0x27}, // (6) 0x27=250kbps
+//{BK_RF_SETUP,   0x21}, // (6) 0x27=250kbps, lowest txpower
+#endif
+{BK_STATUS,     0x07}, // (7) 7=no effect
+{BK_OBSERVE_TX, 0x00}, // (8) (no effect)
+{BK_CD,         0x00}, // (9) Carrier detect (no effect)
+                       // (10) = 5 byte register
+                       // (11) = 5 byte register
+{BK_RX_ADDR_P2, 0xc3}, // (12) rx address for data pipe 2
+{BK_RX_ADDR_P3, 0xc4}, // (13) rx address for data pipe 3
+{BK_RX_ADDR_P4, 0xc5}, // (14) rx address for data pipe 4
+{BK_RX_ADDR_P5, 0xc6}, // (15) rx address for data pipe 5
+                       // (16) = 5 byte register
+{BK_RX_PW_P0,   0x20}, // (17) size of rx data pipe 0
+{BK_RX_PW_P1,   0x20}, // (18) size of rx data pipe 1
+{BK_RX_PW_P2,   0x20}, // (19) size of rx data pipe 2
+{BK_RX_PW_P3,   0x20}, // (20) size of rx data pipe 3
+{BK_RX_PW_P4,   0x20}, // (21) size of rx data pipe 4
+{BK_RX_PW_P5,   0x20}, // (22) size of rx data pipe 5
+{BK_FIFO_STATUS,0x00}, // (23) fifo status
+                       // (24,25,26,27)
+{BK_DYNPD,      0x3F}, // (28) 0x3f=enable dynamic payload length for all 6 data pipes
+{BK_FEATURE,    BK_FEATURE_EN_DPL | BK_FEATURE_EN_ACK_PAY | BK_FEATURE_EN_DYN_ACK }  // (29) 7=enable ack, no ack, dynamic payload length
+};
 
 extern const uint16_t CRCTable[]; 
 
@@ -231,6 +272,68 @@ void AP_Radio_beken::radio_init(void)
 
     Debug(1, "beken: radio_init starting\n");
 
+	int8_t i;
+	bkReady = 0;
+	gTxSpeed = spd;
+	hal.scheduler->delay_microseconds(1000*100);//delay more than 50ms.
+	beken.SetRBank(0);
+
+	//********************Write Bank0 register******************
+	for (i=20; i >= 0; i--) // From BK_FIFO_STATUS back to beginning of table
+	{
+		uint8_t idx = Bank0_Reg[i][0];
+		uint8_t value = Bank0_Reg[i][1];
+		if (idx == BK_RF_SETUP) // Adjust for speed
+			value = Bank0_Reg6[spd][1];
+		beken.WriteReg((BK_WRITE_REG|idx), value);
+	}
+
+	// Set the various 5 byte addresses
+	beken.WriteRegisterMulti((BK_WRITE_REG|BK_RX_ADDR_P0),RX0_Address,5); // reg 10 - Rx0 addr
+	beken.WriteRegisterMulti((BK_WRITE_REG|BK_RX_ADDR_P1),RX1_Address,5); // REG 11 - Rx1 addr
+	beken.WriteRegisterMulti((BK_WRITE_REG|BK_TX_ADDR),TX_Address,5); // REG 16 - TX addr
+
+#if RADIO_BEKEN
+	i = SPI_Read_Reg(BK_FEATURE);
+	if (i == 0) // i!=0 showed that chip has been actived.so do not active again.
+		beken.WriteReg(BK_ACTIVATE_CMD,0x73);// Active
+#endif
+	for (i = 22; i >= 21; i--)
+		beken.WriteReg((BK_WRITE_REG|Bank0_Reg[i][0]),Bank0_Reg[i][1]);
+
+#if RADIO_BEKEN
+	//********************Write Bank1 register******************
+	SetRBank(1);
+	for (i = IREG1_4; i <= IREG1_13; i++)
+	{
+		const uint8_t* p = &Bank1_RegTable[spd][i][0];
+		uint8_t idx = *p++;
+		beken.WriteRegisterMulti((BK_WRITE_REG|idx), p, 4);
+	}
+	beken.WriteRegisterMulti((BK_WRITE_REG|BK2425_R1_14),&(Bank1_Reg14[0]),11);
+
+//toggle REG4<25,26>
+	{
+		const uint8_t* p = &Bank1_RegTable[spd][IREG1_4A][0];
+		uint8_t idx = *p++;
+		beken.WriteRegisterMulti((BK_WRITE_REG|idx), p, 4);
+	}
+	{
+		const uint8_t* p = &Bank1_RegTable[spd][IREG1_4][0];
+		uint8_t idx = *p++;
+		beken.WriteRegisterMulti((BK_WRITE_REG|idx), p, 4);
+	}
+
+	hal.scheduler->delay_microseconds(1000*100);//delay more than 50ms.
+
+	/********************switch back to Bank0 register access******************/
+	beken.SetRBank(0);
+#else
+	hal.scheduler->delay_microseconds(1000*100);
+#endif
+	SwitchToRxMode(); // switch to RX mode
+	bkReady = 1;
+	
     //beken.Reset();
     //for (uint8_t i=0; i<ARRAY_SIZE(radio_config); i++) {
     //    cc2500.WriteReg(radio_config[i].reg, radio_config[i].value);
