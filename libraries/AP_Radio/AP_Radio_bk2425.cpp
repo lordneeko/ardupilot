@@ -191,8 +191,8 @@ void AP_Radio_beken::radio_init(void)
     Debug(1, "beken: radio_init starting\n");
 
 	int8_t i;
-	bkReady = 0;
-	gTxSpeed = spd;
+	beken.bkReady = 0;
+	beken.gTxSpeed = spd;
 	hal.scheduler->delay_microseconds(1000*100);//delay more than 50ms.
 	beken.SetRBank(0);
 
@@ -250,7 +250,7 @@ void AP_Radio_beken::radio_init(void)
 	hal.scheduler->delay_microseconds(1000*100);
 #endif
 	SwitchToRxMode(); // switch to RX mode
-	bkReady = 1;
+	beken.bkReady = 1;
 	
     //beken.Reset();
     //for (uint8_t i=0; i<ARRAY_SIZE(radio_config); i++) {

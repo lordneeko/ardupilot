@@ -180,6 +180,7 @@ private:
     struct telem_status t_status;
     uint32_t last_pps_ms;
     
+    // shoukdnt this have an initial value? - ask carl
     ITX_SPEED spd;
 };
 

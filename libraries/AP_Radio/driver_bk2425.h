@@ -297,18 +297,7 @@ static const uint8_t Bank0_Reg[][2]={
 #endif
 
 
-// MOTE: not sure if this is how it should be declared
 
-uint8_t bkReady;
-
-// Note: this should be moved to be within the class
-#if (TX_SPEED==250)
-ITX_SPEED gTxSpeed = ITX_250;
-#elif (TX_SPEED==100)
-ITX_SPEED gTxSpeed = ITX_1000;
-#elif (TX_SPEED==2000)
-ITX_SPEED gTxSpeed = ITX_2000;
-#endif
 
 //----------------------------------------------------------------------------------
 // BEKEN driver class
@@ -342,7 +331,18 @@ public:
         dev->get_semaphore()->give();
     }
     
+    // MOTE: not sure if this is how it should be declared
 
+    uint8_t bkReady;
+    
+    // Note: this should be moved to be within the class
+    #if (TX_SPEED==250)
+    ITX_SPEED gTxSpeed = ITX_250;
+    #elif (TX_SPEED==100)
+    ITX_SPEED gTxSpeed = ITX_1000;
+    #elif (TX_SPEED==2000)
+    ITX_SPEED gTxSpeed = ITX_2000;
+    #endif
     
 
 private:
