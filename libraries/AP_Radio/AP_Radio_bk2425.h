@@ -29,7 +29,7 @@
 #include "hal.h"
 #endif
 #include "telem_structure.h"
-#include "driver_beken.h"
+#include "driver_bk2425.h"
 
 #define BEKEN_MAX_CHANNELS 8
 

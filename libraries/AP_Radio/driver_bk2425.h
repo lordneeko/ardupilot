@@ -202,7 +202,7 @@ static const uint8_t Bank0_Reg[][2]={
     #elif (TX_SPEED == 1000)
         {BK_RF_SETUP,   0x07},      // (6) 0x07=1Mbps, high gain, high txpower
     #elif (TX_SPEED == 250)
-        BK_RF_SETUP,   0x27},       // (6) 0x27=250kbps
+        {BK_RF_SETUP,   0x27},       // (6) 0x27=250kbps
         //{BK_RF_SETUP,   0x21},    // (6) 0x27=250kbps, lowest txpower
     #endif
     
