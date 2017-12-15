@@ -2,7 +2,7 @@
   low level driver for the beken radio on SPI
 */
 
-#include "driver_beken.h"
+#include "driver_bk2425.h"
 #include <utility>
 
 #pragma GCC optimize("O0")
@@ -21,7 +21,7 @@ void Radio_Beken::ReadFifo(uint8_t *dpbuffer, uint8_t len)
 
 void Radio_Beken::WriteFifo(const uint8_t *dpbuffer, uint8_t len)
 {
-    WriteRegisterMulti(W_TX_PAYLOAD_NOACK_CMD, dpbuffer, len);
+    WriteRegisterMulti(BK_W_TX_PAYLOAD_NOACK_CMD, dpbuffer, len);
 }
 
 void Radio_Beken::ReadRegisterMulti(uint8_t address, uint8_t *data, uint8_t length)
