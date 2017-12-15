@@ -10,6 +10,7 @@
 #define RADIO_NRF24 0
 #define RADIO_BEKEN 1 // We are using the Beken BK2425 chip
 #define SUPPORT_PA 0
+#define TX_SPEED 250u // Default transmit speed in kilobits per second.
 
 /** SPI register commands for the BK2425 and nrf24L01+ chips */
 typedef enum {
@@ -123,10 +124,28 @@ enum {
 	BK_FEATURE_EN_DYN_ACK = 0x01, //
 };
 
-
 // (Lets make it one radio interface for both projects)
+
+/** The baud rate of the GFSK modulation */
+typedef enum ITX_SPEED_e {
+	ITX_250,  ///< 250kbps (slowest but furthest range)
+	ITX_1000, ///< 1000kbps (balanced)
+	ITX_2000, ///< 2000kbps (fastest hence least congested)
+	ITX_MAX
+} ITX_SPEED;
+
 #if RADIO_BEKEN
 #define PLL_SPEED { BK2425_R1_12, 0x00,0x12,0x73,0x05 } // 0x00127305ul, // PLL locking time 130us compatible with nRF24L01;
+
+// In the array Bank1_Reg0_13[],all the register values are the byte reversed!
+enum {
+	IREG1_4,
+	IREG1_5,
+	IREG1_12,
+	IREG1_13,
+	IREG1_4A,
+	IREG_MAX
+};
 
 const uint8_t Bank1_RegTable[ITX_MAX][IREG_MAX][5]={
 	// (TX_SPEED == 250u)
