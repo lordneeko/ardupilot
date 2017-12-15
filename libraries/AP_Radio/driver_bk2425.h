@@ -272,20 +272,21 @@ static const uint8_t Bank0_Reg[][2]={
 #define DEFAULT_OUTPUT_REG4 TOKENPASTE2(OUTPUT_POWER_REG4_,DEFAULT_OUTPUT_POWER)
 
 //----------------------------------------------------------------------------------
-// Support the IO registers
-#define BEKEN_SELECT()       hal.gpio->write_high(BEKEN_CS_GPIO_PORT, BEKEN_CS_PIN)
-#define BEKEN_DESELECT()    do { \
-								hal.gpio->write_high(BEKEN_CS_GPIO_PORT, BEKEN_CS_PIN); \
-								nop(); \
-								nop(); \
-							} while(0)
+// God knows which pins these are connected to, until we get a schematic.
+#define HAL_GPIO_RADIO_SELECT 1
+#define HAL_GPIO_RADIO_CE 2
+#define HAL_GPIO_RADIO_PA 4
 
-#define BEKEN_CE_HIGH()      hal.gpio->write_high(BEKEN_CE_GPIO_PORT, BEKEN_CE_PIN)
-#define BEKEN_CE_LOW()       hal.gpio->write_low(BEKEN_CE_GPIO_PORT, BEKEN_CE_PIN)
+// This assumes we are using ChiBios instead of the pixhawk o/s for accessing GPIO
+#define BEKEN_SELECT()      (hal.gpio->write(HAL_GPIO_RADIO_SELECT, 0))
+#define BEKEN_DESELECT()    (hal.gpio->write(HAL_GPIO_RADIO_SELECT, 1))
+
+#define BEKEN_CE_HIGH()     (hal.gpio->write(HAL_GPIO_RADIO_CE, 1))
+#define BEKEN_CE_LOW()      (hal.gpio->write(HAL_GPIO_RADIO_CE, 0))
 
 #if SUPPORT_PA
-#define BEKEN_PA_HIGH()     (RADIO_TX_PORT->ODR |= RADIO_TX_PIN)
-#define BEKEN_PA_LOW()      (RADIO_TX_PORT->ODR &= ~RADIO_TX_PIN)
+#define BEKEN_PA_HIGH()     (hal.gpio->write(HAL_GPIO_RADIO_PA, 1))
+#define BEKEN_PA_LOW()      (hal.gpio->write(HAL_GPIO_RADIO_PA, 0))
 #else
 #define BEKEN_PA_HIGH()     ((void)0)
 #define BEKEN_PA_LOW()      ((void)0)
