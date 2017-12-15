@@ -322,6 +322,8 @@ static const uint8_t Bank0_Reg[][2]={
 #error This configuration is not supported.
 #elif CONFIG_HAL_BOARD == HAL_BOARD_CHIBIOS
 #if CONFIG_HAL_BOARD_SUBTYPE == HAL_BOARD_SUBTYPE_CHIBIOS_SKYVIPER_F412
+#define BEKEN_SELECT()      (dev->set_chip_select(true))
+#define BEKEN_DESELECT()    (dev->set_chip_select(false))
 #define BEKEN_CE_HIGH()     (hal.gpio->write(HAL_CHIBIOS_GPIO_RADIO_CE, 1))
 #define BEKEN_CE_LOW()      (hal.gpio->write(HAL_CHIBIOS_GPIO_RADIO_CE, 0))
 #define BEKEN_PA_HIGH()     (hal.gpio->write(HAL_CHIBIOS_GPIO_RADIO_PA_CTL, 1))
