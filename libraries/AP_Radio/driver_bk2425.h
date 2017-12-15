@@ -12,6 +12,7 @@
 #define SUPPORT_PA 0
 #define TX_SPEED 250u // Default transmit speed in kilobits per second.
 
+
 /** SPI register commands for the BK2425 and nrf24L01+ chips */
 typedef enum {
 // General commands
@@ -133,6 +134,9 @@ typedef enum ITX_SPEED_e {
 	ITX_2000, ///< 2000kbps (fastest hence least congested)
 	ITX_MAX
 } ITX_SPEED;
+
+
+
 
 #if RADIO_BEKEN
 #define PLL_SPEED { BK2425_R1_12, 0x00,0x12,0x73,0x05 } // 0x00127305ul, // PLL locking time 130us compatible with nRF24L01;
@@ -292,6 +296,20 @@ static const uint8_t Bank0_Reg[][2]={
 #define BEKEN_PA_LOW()      ((void)0)
 #endif
 
+
+// MOTE: not sure if this is how it should be declared
+
+uint8_t bkReady;
+
+// Note: this should be moved to be within the class
+#if (TX_SPEED==250)
+ITX_SPEED gTxSpeed = ITX_250;
+#elif (TX_SPEED==100)
+ITX_SPEED gTxSpeed = ITX_1000;
+#elif (TX_SPEED==2000)
+ITX_SPEED gTxSpeed = ITX_2000;
+#endif
+
 //----------------------------------------------------------------------------------
 // BEKEN driver class
 class Radio_Beken {
@@ -324,7 +342,8 @@ public:
         dev->get_semaphore()->give();
     }
     
-    uint8_t bkReady;
+
+    
 
 private:
     AP_HAL::OwnPtr<AP_HAL::SPIDevice> dev;

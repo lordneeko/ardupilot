@@ -36,6 +36,7 @@
 class AP_Radio_beken : public AP_Radio_backend
 {
 public:
+    
     AP_Radio_beken(AP_Radio &radio);
     
     // init - initialise radio
