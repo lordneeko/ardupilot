@@ -79,6 +79,8 @@ public:
         // t_status.wifi_chan = channel;
     }
     
+
+    
 private:
     AP_HAL::OwnPtr<AP_HAL::SPIDevice> dev;
     static AP_Radio_beken *radio_instance;
@@ -177,6 +179,8 @@ private:
 
     struct telem_status t_status;
     uint32_t last_pps_ms;
+    
+    ITX_SPEED spd;
 };
 
 

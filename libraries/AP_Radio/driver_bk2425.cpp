@@ -7,15 +7,6 @@
 
 #pragma GCC optimize("O0")
 
-// Note: this should be moved to be within the class
-#if (TX_SPEED==250)
-ITX_SPEED gTxSpeed = ITX_250;
-#elif (TX_SPEED==100)
-ITX_SPEED gTxSpeed = ITX_1000;
-#elif (TX_SPEED==2000)
-ITX_SPEED gTxSpeed = ITX_2000;
-#endif
-
 extern const AP_HAL::HAL& hal;
 
 // constructor
