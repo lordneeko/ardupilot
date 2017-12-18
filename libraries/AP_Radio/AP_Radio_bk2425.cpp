@@ -40,6 +40,13 @@ virtual_timer_t AP_Radio_beken::timeout_vt;
 uint32_t AP_Radio_beken::irq_time_us;
 #endif
 
+#define USER_ADDRESS_COMPONENT 0x59
+#define MODEL_ADDRESS_COMPONENT 0x31
+	
+uint8_t TX_Address[]={0x80,USER_ADDRESS_COMPONENT,MODEL_ADDRESS_COMPONENT,0xC6,0x2C}; // non-const (Unbound tx)
+uint8_t RX0_Address[]={0x01,USER_ADDRESS_COMPONENT,MODEL_ADDRESS_COMPONENT,0xC6,0x2C}; // non-const The data address
+uint8_t RX1_Address[]={0x00,USER_ADDRESS_COMPONENT,MODEL_ADDRESS_COMPONENT,0xC6,0x2C}; // non-const The pairing address
+
 /*
   constructor
  */
@@ -151,7 +158,7 @@ uint8_t AP_Radio_beken::num_channels(void)
         t_status.pps = stats.recv_packets - last_stats.recv_packets;
         last_stats = stats;
         if (lost != 0 || timeouts != 0) {
-            Debug(3,"lost=%u timeouts=%u\n", lost, timeouts);
+            Debug(3,"lost=%lu timeouts=%lu\n", lost, timeouts);
         }
         lost=0;
         timeouts=0;
@@ -193,7 +200,7 @@ void AP_Radio_beken::radio_init(void)
 	int8_t i;
 	beken.bkReady = 0;
 	beken.gTxSpeed = spd;
-	hal.scheduler->delay_microseconds(1000*100);//delay more than 50ms.
+	hal.scheduler->delay(100);//delay more than 50ms.
 	beken.SetRBank(0);
 
 	//********************Write Bank0 register******************
@@ -212,7 +219,7 @@ void AP_Radio_beken::radio_init(void)
 	beken.WriteRegisterMulti((BK_WRITE_REG|BK_TX_ADDR),TX_Address,5); // REG 16 - TX addr
 
 #if RADIO_BEKEN
-	i = SPI_Read_Reg(BK_FEATURE);
+	i = beken.ReadReg(BK_FEATURE);
 	if (i == 0) // i!=0 showed that chip has been actived.so do not active again.
 		beken.WriteReg(BK_ACTIVATE_CMD,0x73);// Active
 #endif
@@ -221,7 +228,7 @@ void AP_Radio_beken::radio_init(void)
 
 #if RADIO_BEKEN
 	//********************Write Bank1 register******************
-	SetRBank(1);
+	beken.SetRBank(1);
 	for (i = IREG1_4; i <= IREG1_13; i++)
 	{
 		const uint8_t* p = &Bank1_RegTable[spd][i][0];
@@ -242,14 +249,14 @@ void AP_Radio_beken::radio_init(void)
 		beken.WriteRegisterMulti((BK_WRITE_REG|idx), p, 4);
 	}
 
-	hal.scheduler->delay_microseconds(1000*100);//delay more than 50ms.
+	hal.scheduler->delay(100);//delay more than 50ms.
 
 	/********************switch back to Bank0 register access******************/
 	beken.SetRBank(0);
 #else
 	hal.scheduler->delay_microseconds(1000*100);
 #endif
-	SwitchToRxMode(); // switch to RX mode
+	beken.SwitchToRxMode(); // switch to RX mode
 	beken.bkReady = 1;
 	
     //beken.Reset();
@@ -329,7 +336,7 @@ void AP_Radio_beken::handle_data_packet(mavlink_channel_t chan, const mavlink_da
 // main IRQ handler
 void AP_Radio_beken::irq_handler(void)
 {
-    uint8_t ccLen;
+    uint8_t ccLen = 32;
     //bool matched = false;
     //do {
     //    ccLen = cc2500.ReadReg(CC2500_3B_RXBYTES | CC2500_READ_BURST);
@@ -533,7 +540,7 @@ void AP_Radio_beken::irq_timeout(void)
     }
         
     case STATE_DATA: {
-        uint32_t now = AP_HAL::micros();
+//        uint32_t now = AP_HAL::micros();
         
         //if (now - packet_timer > 50*sync_time_us) {
         //    Debug(3,"searching %u\n", now - packet_timer);
@@ -620,7 +627,7 @@ void AP_Radio_beken::initTuneRx(void)
     //cc2500.Strobe(CC2500_SRX);
 }
 
-void AP_Radio_cc2500::initialiseData(uint8_t adr)
+void AP_Radio_beken::initialiseData(uint8_t adr)
 {
     //cc2500.WriteReg(CC2500_0C_FSCTRL0, bindOffset);
     //cc2500.WriteReg(CC2500_18_MCSM0, 0x8);
@@ -630,7 +637,7 @@ void AP_Radio_cc2500::initialiseData(uint8_t adr)
     hal.scheduler->delay_microseconds(10*1000);
 }
 
-void AP_Radio_cc2500::initGetBind(void)
+void AP_Radio_beken::initGetBind(void)
 {
     //cc2500.Strobe(CC2500_SIDLE);
     //cc2500.WriteReg(CC2500_23_FSCAL3, calData[0][0]);
@@ -726,7 +733,7 @@ void AP_Radio_beken::setChannel(uint8_t channel)
     //cc2500.Strobe(CC2500_SRX);
 }
 
-void AP_Radio_cc2500::nextChannel(uint8_t skip)
+void AP_Radio_beken::nextChannel(uint8_t skip)
 {
     channr = (channr + skip) % listLength;
     setChannel(bindHopData[channr]);
@@ -759,7 +766,7 @@ void AP_Radio_beken::parse_frSkyX(const uint8_t *packet)
         uint16_t word_temp = (((c[i]-64)<<1)/3+860);
         if ((word_temp > 800) && (word_temp < 2200)) {
             uint8_t chan = i+j;
-            if (chan < CC2500_MAX_CHANNELS) {
+            if (chan < BEKEN_MAX_CHANNELS) {
                 pwm_channels[chan] = word_temp;
                 if (chan >= chan_count) {
                     chan_count = chan+1;

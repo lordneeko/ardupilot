@@ -108,7 +108,7 @@ void Radio_Beken::SetPower(uint8_t power)
 	uint8_t oldready = bkReady;
 	bkReady = 0;
 #if RADIO_BEKEN
-	hal.scheduler->delay_microseconds(1000*100); // delay more than 50ms.
+	hal.scheduler->delay(100); // delay more than 50ms.
 	SetRBank(1);
 	{
 		const uint8_t* p = &Bank1_RegTable[gTxSpeed][IREG1_4][0];
@@ -122,9 +122,9 @@ void Radio_Beken::SetPower(uint8_t power)
 		buf[0] |= (RegPower[power][0] << 3); // Bits 27..29
 		WriteRegisterMulti((BK_WRITE_REG|idx), buf, 4);
 	}
-	hal.scheduler->delay_microseconds(1000*100); // delay more than 50ms.
+	hal.scheduler->delay(100); // delay more than 50ms.
 	SetRBank(0);
-	hal.scheduler->delay_microseconds(1000*100);
+	hal.scheduler->delay(100);
 #endif
 
 	uint8_t setup = ReadReg(BK_RF_SETUP);
@@ -162,7 +162,7 @@ void Radio_Beken::SwitchToRxMode(void)
 
 	BEKEN_CE_LOW();
 	for (value = 0; value < 40; ++value)
-		nop();
+	{	asm volatile("nop"::); }
 	value = ReadReg(BK_CONFIG);	// read register CONFIG's value
 	value |= BK_CONFIG_PRIM_RX; // set bit 0
 	WriteReg(BK_WRITE_REG | BK_CONFIG, value); // Set PWR_UP bit, enable CRC(2 length) & Prim:RX. RX_DR enabled..
@@ -181,7 +181,7 @@ void Radio_Beken::SwitchToTxMode(void)
 	BEKEN_PA_HIGH();
 	BEKEN_CE_LOW();
 	for (value = 0; value < 40; ++value)
-		nop();
+	{	asm volatile("nop"::); }
 	value = ReadReg(BK_CONFIG); // read register CONFIG's value
 	value &= ~BK_CONFIG_PRIM_RX; // Clear bit 0 (PTX)
 	WriteReg(BK_WRITE_REG | BK_CONFIG, value); // Set PWR_UP bit, enable CRC(2 length) & Prim:RX. RX_DR enabled.
@@ -198,7 +198,7 @@ void Radio_Beken::SwitchToIdleMode(void)
 	BEKEN_PA_LOW();
 	BEKEN_CE_LOW();
 	for (value = 0; value < 40; ++value)
-		nop();
+	{	asm volatile("nop"::); }
 }
 
 // ----------------------------------------------------------------------------
@@ -215,7 +215,7 @@ void Radio_Beken::SwitchToSleepMode(void)
 	BEKEN_PA_LOW();
 	BEKEN_CE_LOW();
 	for (value = 0; value < 40; ++value)
-		nop();
+	{	asm volatile("nop"::); }
 	value = ReadReg(BK_CONFIG);	// read register CONFIG's value
 	value |= BK_CONFIG_PRIM_RX; // Receive mode
 	value &= ~BK_CONFIG_PWR_UP; // Power down

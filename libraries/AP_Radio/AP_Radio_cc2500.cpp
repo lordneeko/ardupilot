@@ -153,7 +153,7 @@ uint8_t AP_Radio_cc2500::num_channels(void)
         t_status.pps = stats.recv_packets - last_stats.recv_packets;
         last_stats = stats;
         if (lost != 0 || timeouts != 0) {
-            Debug(3,"lost=%u timeouts=%u\n", lost, timeouts);
+            Debug(3,"lost=%lu timeouts=%lu\n", lost, timeouts);
         }
         lost=0;
         timeouts=0;
@@ -538,7 +538,7 @@ void AP_Radio_cc2500::irq_timeout(void)
         uint32_t now = AP_HAL::micros();
         
         if (now - packet_timer > 50*sync_time_us) {
-            Debug(3,"searching %u\n", now - packet_timer);
+            Debug(3,"searching %lu\n", now - packet_timer);
             cc2500.Strobe(CC2500_SIDLE);
             cc2500.Strobe(CC2500_SFRX);
             nextChannel(1);
