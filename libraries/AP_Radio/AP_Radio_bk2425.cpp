@@ -70,8 +70,8 @@ bool AP_Radio_beken::init(void)
     chVTObjectInit(&timeout_vt);
     _irq_handler_ctx = chThdCreateStatic(_irq_handler_wa,
                      sizeof(_irq_handler_wa),
-                     TIMEOUT_PRIORITY,        /* Initial priority.    */
-                     irq_handler_thd,  /* Thread function.     */
+                     TIMEOUT_PRIORITY,          /* Initial priority.    */
+                     irq_handler_thd,           /* Thread function.     */
                      NULL);                     /* Thread parameter.    */
 #endif
     sem = hal.util->new_semaphore();    
