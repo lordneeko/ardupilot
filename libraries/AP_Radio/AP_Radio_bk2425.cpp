@@ -223,16 +223,20 @@ const uint16_t CRCTable[] = {
  */
 void AP_Radio_beken::radio_init(void)
 {
-    //if (beken.ReadReg(CC2500_30_PARTNUM | CC2500_READ_BURST) != 0x80 ||
-    //    beken.ReadReg(CC2500_31_VERSION | CC2500_READ_BURST) != 0x03) {
-    //    return;
-    //}
+	beken.SetRBank(1);
+    uint8_t id = beken.ReadReg(BK2425_R1_WHOAMI);
+	beken.SetRBank(0);
+	
+	if (id != BK_CHIP_ID_BK2425)
+	{
+        return; // Failure
+	}
 
     Debug(1, "beken: radio_init starting\n");
 
 	int8_t i;
 	beken.bkReady = 0;
-	beken.gTxSpeed = spd;
+	ITX_SPEED spd = beken.gTxSpeed;
 	hal.scheduler->delay(100);//delay more than 50ms.
 	beken.SetRBank(0);
 
