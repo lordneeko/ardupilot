@@ -66,6 +66,7 @@ COMMON_VEHICLE_DEPENDENT_LIBRARIES = [
     'AP_SBusOut',
     'AP_IOMCU',
     'AP_RAMTRON',
+    'AP_Radio',
 ]
 
 def get_legacy_defines(sketch_name):
