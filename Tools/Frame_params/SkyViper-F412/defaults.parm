@@ -40,8 +40,8 @@ COMPASS_ODI_Z    0.091
 
 # battery setup
 BATT_MONITOR     3
-BATT_VOLT_PIN    4
-BATT_VOLT_MULT   4.8
+BATT_VOLT_PIN    9
+BATT_VOLT_MULT   1
 
 # motor compensation
 COMPASS_MOTCT    3
