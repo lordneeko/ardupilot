@@ -62,6 +62,7 @@ const ChibiAnalogIn::pin_info ChibiAnalogIn::pin_config[] = {
     { 12,  VOLTAGE_SCALING },   // PWM2_SENSE
     { 0,   VOLTAGE_SCALING },   // PWM3_SENSE
     { 11,  VOLTAGE_SCALING },   // PWM4_SENSE
+    { 10,  VOLTAGE_SCALING },   // MGND
 #endif
 };
 
