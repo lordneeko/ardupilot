@@ -64,7 +64,7 @@ using namespace ChibiOS;
 #define SPIDEV_EXT0             5
 
 #define SPIDEV_RAMTROM          10
-#define SPIDEV_CYRF             11
+#define SPIDEV_RADIO            11
 
 #endif // CONFIG_HAL_BOARD_SUBTYPE
 
@@ -97,6 +97,7 @@ static struct SPIDriverInfo {
 SPIDesc SPIDeviceManager::device_table[] = {
 #if CONFIG_HAL_BOARD_SUBTYPE == HAL_BOARD_SUBTYPE_CHIBIOS_SKYVIPER_F412
     SPIDesc("cypress",        SPI_BUS_RADIO,    SPIDEV_RADIO,         SPIDEV_CS_RADIO,      SPIDEV_MODE0, 2*MHZ, 2*MHZ),
+    SPIDesc("cc2500",         SPI_BUS_RADIO,    SPIDEV_RADIO,         SPIDEV_CS_RADIO,      SPIDEV_MODE0, 4*MHZ, 4*MHZ),
     SPIDesc("pixartflow",     SPI_BUS_FLOW,     SPIDEV_FLOW,          SPIDEV_CS_FLOW,       SPIDEV_MODE3, 2*MHZ, 2*MHZ),
 #elif CONFIG_HAL_BOARD_SUBTYPE == HAL_BOARD_SUBTYPE_CHIBIOS_FMUV3
     SPIDesc("ms5611",         SPI_BUS_SENSORS,  SPIDEV_BARO,          SPIDEV_CS_MS5611,     SPIDEV_MODE3, 20*MHZ, 20*MHZ),
@@ -110,7 +111,8 @@ SPIDesc SPIDeviceManager::device_table[] = {
     SPIDesc("lsm9ds0_ext_g",  SPI_BUS_EXT,      SPIDEV_EXT_LSM9DS0_G, SPIDEV_CS_LSM9DS0_G,  SPIDEV_MODE3, 11*MHZ, 11*MHZ ),
     SPIDesc("lsm9ds0_ext_am", SPI_BUS_EXT,      SPIDEV_EXT_LSM9DS0_AM,SPIDEV_CS_LSM9DS0_AM, SPIDEV_MODE3, 11*MHZ, 11*MHZ ),
     SPIDesc("ramtron",        SPI_BUS_RAMTRON,  SPIDEV_RAMTROM,       SPIDEV_CS_RAMTRON,    SPIDEV_MODE3, 8*MHZ, 8*MHZ ),
-    SPIDesc("cypress",        SPI_BUS_RADIO,    SPIDEV_CYRF,          SPIDEV_CS_RADIO,      SPIDEV_MODE0, 2*MHZ, 2*MHZ),
+    SPIDesc("cypress",        SPI_BUS_RADIO,    SPIDEV_RADIO,         SPIDEV_CS_RADIO,      SPIDEV_MODE0, 2*MHZ, 2*MHZ),
+    SPIDesc("cc2500",         SPI_BUS_RADIO,    SPIDEV_RADIO,         SPIDEV_CS_RADIO,      SPIDEV_MODE0, 4*MHZ, 4*MHZ),
     SPIDesc("external0m0",    SPI_BUS_EXT,      SPIDEV_EXT0,          SPIDEV_CS_EXT0,       SPIDEV_MODE0, 2*MHZ, 2*MHZ),
     SPIDesc("external0m1",    SPI_BUS_EXT,      SPIDEV_EXT0,          SPIDEV_CS_EXT0,       SPIDEV_MODE1, 2*MHZ, 2*MHZ),
     SPIDesc("external0m2",    SPI_BUS_EXT,      SPIDEV_EXT0,          SPIDEV_CS_EXT0,       SPIDEV_MODE2, 2*MHZ, 2*MHZ),
