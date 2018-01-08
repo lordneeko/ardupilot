@@ -39,7 +39,6 @@ extern const AP_HAL::HAL& hal;
 using namespace ChibiOS;
 
 // pin number for VCC rail
-#define ANALOG_VCC_5V_PIN 4
 
 /*
   scaling table between ADC count and actual input voltage, to account
@@ -47,6 +46,7 @@ using namespace ChibiOS;
  */
 const ChibiAnalogIn::pin_info ChibiAnalogIn::pin_config[] = {
 #if CONFIG_HAL_BOARD_SUBTYPE == HAL_BOARD_SUBTYPE_CHIBIOS_FMUV3
+#define ANALOG_VCC_5V_PIN 4
     { 4,   VOLTAGE_SCALING*2 }, // VCC 5V rail sense
     { 2,   VOLTAGE_SCALING   }, // 3DR Brick voltage
     { 3,   VOLTAGE_SCALING   }, // 3DR Brick current
@@ -54,7 +54,8 @@ const ChibiAnalogIn::pin_info ChibiAnalogIn::pin_config[] = {
     { 14,  VOLTAGE_SCALING   }, // AUX ADC pin 3
     { 15,  VOLTAGE_SCALING*2 }, // analog airspeed sensor, 2:1 scaling
 #elif CONFIG_HAL_BOARD_SUBTYPE == HAL_BOARD_SUBTYPE_CHIBIOS_SKYVIPER_F412
-    { 4,   0.007734  },         // VCC 5V rail sense
+#define ANALOG_VCC_5V_PIN 9
+    { 9,   VOLTAGE_SCALING*11 },// VCC 5V rail sense
     { 13,  VOLTAGE_SCALING },   // PWM1_SENSE
     { 12,  VOLTAGE_SCALING },   // PWM2_SENSE
     { 0,   VOLTAGE_SCALING },   // PWM3_SENSE
@@ -68,9 +69,6 @@ const ChibiAnalogIn::pin_info ChibiAnalogIn::pin_config[] = {
 adcsample_t ChibiAnalogIn::samples[ADC_DMA_BUF_DEPTH*ADC_GRP1_NUM_CHANNELS];
 uint32_t ChibiAnalogIn::sample_sum[ADC_GRP1_NUM_CHANNELS];
 uint32_t ChibiAnalogIn::sample_count;
-
-// special pin numbers
-#define ANALOG_VCC_5V_PIN                4
 
 ChibiAnalogSource::ChibiAnalogSource(int16_t pin, float initial_value) :
     _pin(pin),
