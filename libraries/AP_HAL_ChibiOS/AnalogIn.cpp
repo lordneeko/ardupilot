@@ -23,6 +23,8 @@
 extern AP_IOMCU iomcu;
 #endif
 
+#include <GCS_MAVLink/GCS_MAVLink.h>
+
 #define ANLOGIN_DEBUGGING 0
 
 // base voltage scaling for 12 bit 3.3V ADC
@@ -291,6 +293,16 @@ void ChibiAnalogIn::_timer_tick(void)
     // now handle special inputs from IOMCU
     _servorail_voltage = iomcu.get_vservo();
 #endif
+
+    static uint8_t count;
+    if (AP_HAL::millis() > 5000 && count++ == 10) {
+        count = 0;
+        uint16_t adc[6] {};
+        for (uint8_t i=0; i < ADC_GRP1_NUM_CHANNELS; i++) {
+            adc[i] = buf_adc[i];
+        }
+        mavlink_msg_ap_adc_send(MAVLINK_COMM_0, adc[0], adc[1], adc[2], adc[3], adc[4], adc[5]);
+    }
 }
 
 AP_HAL::AnalogSource* ChibiAnalogIn::channel(int16_t pin) 
