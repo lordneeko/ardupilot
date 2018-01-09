@@ -28,9 +28,9 @@
 enum {
 	HAL_CHIBIOS_GPIO_LEDR = 0,      // Meaning GPIOB, 7 (for 1802-02, 1802-05)
 	HAL_CHIBIOS_GPIO_LEDF,          // Meaning GPIOB, 6 (for 1802-02, 1802-05)
+    HAL_CHIBIOS_GPIO_RADIO_IRQ,	    // Meaning GPIOD, 2 (for 1802-02) or GPIOB, 0 (for 1802-05)
 	HAL_CHIBIOS_GPIO_RADIO_CE,      // Meaning GPIOC, 4 (for 1802-02, 1802-05)
 	HAL_CHIBIOS_GPIO_RADIO_PA_CTL	// Meaning GPIOC, 5 (for 1802-02, 1802-05)
-	HAL_CHIBIOS_GPIO_RADIO_IRQ	    // Meaning GPIOD, 2 (for 1802-02) or GPIOB, 0 (for 1802-05)
 };
 
 //----------------------------------------------------------------------------------
@@ -40,19 +40,19 @@ enum {
 //    SPIDEV_CS_CYRF A15
 //    SPIDEV_CS_FLOW B1
 
-#if (PCB_BOARD_PRODUCT==1802) && (PCB_REVISION==2) // PCB 1802-02 dated 18 oct 2017
+//#if (PCB_BOARD_PRODUCT==1802) && (PCB_REVISION==2) // PCB 1802-02 dated 18 oct 2017
 //#define HAL_GPIO_SPI_SCK                 GPIOA,  5
 //#define HAL_GPIO_SPI_MOSI                GPIOA,  7
 //#define HAL_GPIO_SPI_MISO                GPIOB,  4
 //#define HAL_GPIO_RADIO_CS                GPIOA, 15                          Named SPIDEV_CS_CYRF
-#endif
+//#endif
 
-#if (PCB_BOARD_PRODUCT==1802) && (PCB_REVISION==5) // PCB 1802-05 dated 7 dec 2017
+//#if (PCB_BOARD_PRODUCT==1802) && (PCB_REVISION==5) // PCB 1802-05 dated 7 dec 2017
 //#define HAL_GPIO_SPI_SCK	               GPIOA,  5
 //#define HAL_GPIO_SPI_MOSI	               GPIOA,  7
 //#define HAL_GPIO_SPI_MISO                GPIOA,  6 (Different from 1802-02)
 //#define HAL_GPIO_RADIO_CS                GPIOA,  4 (Different from 1802-02) Named SPIDEV_CS_CYRF
-#endif
+//#endif
 
 //----------------------------------------------------------------------------------
 /** SPI register commands for the BK2425 and nrf24L01+ chips */
