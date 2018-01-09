@@ -7,12 +7,54 @@
 #include <AP_HAL/AP_HAL.h>
 
 // Choose between supporting the Nordic nrf24l01+ and the Beken BK2425 radio chips
+// The exact revision of the PCB matters, as pins change location
+#define PCB_BOARD_PRODUCT 1802
+#define PCB_BOARD_REVISION 2
+
 #define RADIO_NRF24 0
 #define RADIO_BEKEN 1 // We are using the Beken BK2425 chip
-#define SUPPORT_PA 0
+#define SUPPORT_PA 1
 #define TX_SPEED 250u // Default transmit speed in kilobits per second.
 
+//----------------------------------------------------------------------------------
+// Under ChiBios the knowledge of which pins are which is not in the driver.
+//----------------------------------------------------------------------------------
 
+//----------------------------------------------------------------------------------
+// Which pins are connected to which devices is stored in:
+// AP_HAL_ChibiOS/GPIO.cpp for the LEDs / Chip enable / power amplifier
+// This should really be in AP_HAL_ChibiOS/GPIO.h for this subboard
+// Reference to GPIO pins for this exact PCB revision
+enum {
+	HAL_CHIBIOS_GPIO_LEDR = 0,      // Meaning GPIOB, 7 (for 1802-02, 1802-05)
+	HAL_CHIBIOS_GPIO_LEDF,          // Meaning GPIOB, 6 (for 1802-02, 1802-05)
+	HAL_CHIBIOS_GPIO_RADIO_CE,      // Meaning GPIOC, 4 (for 1802-02, 1802-05)
+	HAL_CHIBIOS_GPIO_RADIO_PA_CTL	// Meaning GPIOC, 5 (for 1802-02, 1802-05)
+	HAL_CHIBIOS_GPIO_RADIO_IRQ	    // Meaning GPIOD, 2 (for 1802-02) or GPIOB, 0 (for 1802-05)
+};
+
+//----------------------------------------------------------------------------------
+// AP_HAL_ChibiOS/SPIDevice.cpp for each chips
+// Chip Select (Motion, Radio, Optical flow), SCK, MOSI, MISO
+//    SPIDEV_CS_MPU  B12
+//    SPIDEV_CS_CYRF A15
+//    SPIDEV_CS_FLOW B1
+
+#if (PCB_BOARD_PRODUCT==1802) && (PCB_REVISION==2) // PCB 1802-02 dated 18 oct 2017
+//#define HAL_GPIO_SPI_SCK                 GPIOA,  5
+//#define HAL_GPIO_SPI_MOSI                GPIOA,  7
+//#define HAL_GPIO_SPI_MISO                GPIOB,  4
+//#define HAL_GPIO_RADIO_CS                GPIOA, 15                          Named SPIDEV_CS_CYRF
+#endif
+
+#if (PCB_BOARD_PRODUCT==1802) && (PCB_REVISION==5) // PCB 1802-05 dated 7 dec 2017
+//#define HAL_GPIO_SPI_SCK	               GPIOA,  5
+//#define HAL_GPIO_SPI_MOSI	               GPIOA,  7
+//#define HAL_GPIO_SPI_MISO                GPIOA,  6 (Different from 1802-02)
+//#define HAL_GPIO_RADIO_CS                GPIOA,  4 (Different from 1802-02) Named SPIDEV_CS_CYRF
+#endif
+
+//----------------------------------------------------------------------------------
 /** SPI register commands for the BK2425 and nrf24L01+ chips */
 typedef enum {
 // General commands
@@ -275,25 +317,18 @@ static const uint8_t Bank0_Reg[][2]={
 #define DEFAULT_OUTPUT_REG6 TOKENPASTE2(OUTPUT_POWER_REG6_,DEFAULT_OUTPUT_POWER)
 #define DEFAULT_OUTPUT_REG4 TOKENPASTE2(OUTPUT_POWER_REG4_,DEFAULT_OUTPUT_POWER)
 
-//----------------------------------------------------------------------------------
-// God knows which pins these are connected to, until we get a schematic.
-#define HAL_GPIO_RADIO_SELECT 1
-#define HAL_GPIO_RADIO_CE 2
-#define HAL_GPIO_RADIO_PA 4
-
 // This assumes we are using ChiBios instead of the pixhawk o/s for accessing GPIO
-#define BEKEN_SELECT()      (hal.gpio->write(HAL_GPIO_RADIO_SELECT, 0))
-#define BEKEN_DESELECT()    (hal.gpio->write(HAL_GPIO_RADIO_SELECT, 1))
-
-#define BEKEN_CE_HIGH()     (hal.gpio->write(HAL_GPIO_RADIO_CE, 1))
-#define BEKEN_CE_LOW()      (hal.gpio->write(HAL_GPIO_RADIO_CE, 0))
-
-#if SUPPORT_PA
-#define BEKEN_PA_HIGH()     (hal.gpio->write(HAL_GPIO_RADIO_PA, 1))
-#define BEKEN_PA_LOW()      (hal.gpio->write(HAL_GPIO_RADIO_PA, 0))
+#if CONFIG_HAL_BOARD == HAL_BOARD_PX4
+#error This configuration is not supported.
+#elif CONFIG_HAL_BOARD == HAL_BOARD_CHIBIOS
+#if CONFIG_HAL_BOARD_SUBTYPE == HAL_BOARD_SUBTYPE_CHIBIOS_SKYVIPER_F412
+#define BEKEN_CE_HIGH()     (hal.gpio->write(HAL_CHIBIOS_GPIO_RADIO_CE, 1))
+#define BEKEN_CE_LOW()      (hal.gpio->write(HAL_CHIBIOS_GPIO_RADIO_CE, 0))
+#define BEKEN_PA_HIGH()     (hal.gpio->write(HAL_CHIBIOS_GPIO_RADIO_PA_CTL, 1))
+#define BEKEN_PA_LOW()      (hal.gpio->write(HAL_CHIBIOS_GPIO_RADIO_PA_CTL, 0))
 #else
-#define BEKEN_PA_HIGH()     ((void)0)
-#define BEKEN_PA_LOW()      ((void)0)
+#error This configuration is not supported.
+#endif
 #endif
 
 

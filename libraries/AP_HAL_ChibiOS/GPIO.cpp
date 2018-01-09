@@ -19,6 +19,12 @@
 
 #include <AP_BoardConfig/AP_BoardConfig.h>
 
+#if CONFIG_HAL_BOARD_SUBTYPE == HAL_BOARD_SUBTYPE_CHIBIOS_SKYVIPER_F412
+// Valid boards are 1802-02 and 1802-05 (not working because of lack of interrupt support for B0)
+#define PCB_BOARD_PRODUCT 1802
+#define PCB_BOARD_REVISION 2
+#endif
+
 using namespace ChibiOS;
 
 static struct gpio_entry {
@@ -29,6 +35,14 @@ static struct gpio_entry {
 #if CONFIG_HAL_BOARD_SUBTYPE == HAL_BOARD_SUBTYPE_CHIBIOS_SKYVIPER_F412
     {0, PAL_LINE(GPIOB, 7U)},
     {1, PAL_LINE(GPIOB, 6U)},
+    PAL_LINE(GPIOC, 4U), // HAL_CHIBIOS_GPIO_RADIO_CE  radio chip enable
+    PAL_LINE(GPIOC, 5U), // HAL_CHIBIOS_GPIO_RADIO_PA_CTL   radio power amplifier enable
+#if (PCB_BOARD_PRODUCT==1802) && (PCB_REVISION==2) // PCB 1802-02 dated 18 oct 2017
+	PAL_LINE(GPIOD, 2U), // HAL_CHIBIOS_GPIO_RADIO_IRQ  radio interrupt
+#endif
+#if (PCB_BOARD_PRODUCT==1802) && (PCB_REVISION==5) // PCB 1802-05 dated 7 dec 2017
+	PAL_LINE(GPIOB, 0U), // HAL_CHIBIOS_GPIO_RADIO_IRQ  radio interrupt
+#endif	
 #elif CONFIG_HAL_BOARD_SUBTYPE == HAL_BOARD_SUBTYPE_CHIBIOS_FMUV3
     // pin numbers chosen to match px4 build
     {0,  true,  LINE_LED1},
@@ -177,6 +191,7 @@ AP_HAL::DigitalSource* ChibiGPIO::channel(uint16_t n) {
 }
 
 /* Interrupt interface: */
+// TODO: (CPM) Does this only support port d? What about pin B0, needed for 1802-05 boards?
 bool ChibiGPIO::attach_interrupt(uint8_t interrupt_num, AP_HAL::Proc p, uint8_t mode) {
     extStop(&EXTD1);
     switch(mode) {
