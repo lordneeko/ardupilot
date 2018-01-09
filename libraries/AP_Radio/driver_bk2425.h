@@ -370,7 +370,7 @@ public:
     
     // MOTE: not sure if this is how it should be declared
 
-    uint8_t bkReady;
+    uint8_t bkReady; // initialised in AP_Radio_bk2425.h radio_init() at the very end
     
     // Note: this should be moved to be within the class
     #if (TX_SPEED==250)

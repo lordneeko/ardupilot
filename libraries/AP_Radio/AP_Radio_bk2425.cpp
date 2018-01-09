@@ -223,79 +223,80 @@ const uint16_t CRCTable[] = {
  */
 void AP_Radio_beken::radio_init(void)
 {
-	beken.SetRBank(1);
+    beken.SetRBank(1);
     uint8_t id = beken.ReadReg(BK2425_R1_WHOAMI);
-	beken.SetRBank(0);
-	
-	if (id != BK_CHIP_ID_BK2425)
-	{
+    beken.SetRBank(0);
+
+    if (id != BK_CHIP_ID_BK2425) {
+        
+        Debug(1, "bk2425: radio not found\n"); // We have to keep trying  because it takes time to initialise
         return; // Failure
-	}
+    }
 
     Debug(1, "beken: radio_init starting\n");
 
-	int8_t i;
-	beken.bkReady = 0;
-	ITX_SPEED spd = beken.gTxSpeed;
-	hal.scheduler->delay(100);//delay more than 50ms.
-	beken.SetRBank(0);
+    int8_t i;
+    beken.bkReady = 0;
+    spd = beken.gTxSpeed;
+    hal.scheduler->delay(100);//delay more than 50ms.
+    beken.SetRBank(0);
 
-	//********************Write Bank0 register******************
-	for (i=20; i >= 0; i--) // From BK_FIFO_STATUS back to beginning of table
-	{
-		uint8_t idx = Bank0_Reg[i][0];
-		uint8_t value = Bank0_Reg[i][1];
-		if (idx == BK_RF_SETUP) // Adjust for speed
-			value = Bank0_Reg6[spd][1];
-		beken.WriteReg((BK_WRITE_REG|idx), value);
-	}
+    //********************Write Bank0 register******************
+    for (i=20; i >= 0; i--) // From BK_FIFO_STATUS back to beginning of table
+    {
+        uint8_t idx = Bank0_Reg[i][0];
+        uint8_t value = Bank0_Reg[i][1];
+        if (idx == BK_RF_SETUP) // Adjust for speed
+            value = Bank0_Reg6[spd][1];
+        beken.WriteReg((BK_WRITE_REG|idx), value);
+    }
 
-	// Set the various 5 byte addresses
-	beken.WriteRegisterMulti((BK_WRITE_REG|BK_RX_ADDR_P0),RX0_Address,5); // reg 10 - Rx0 addr
-	beken.WriteRegisterMulti((BK_WRITE_REG|BK_RX_ADDR_P1),RX1_Address,5); // REG 11 - Rx1 addr
-	beken.WriteRegisterMulti((BK_WRITE_REG|BK_TX_ADDR),TX_Address,5); // REG 16 - TX addr
+    // Set the various 5 byte addresses
+    beken.WriteRegisterMulti((BK_WRITE_REG|BK_RX_ADDR_P0),RX0_Address,5); // reg 10 - Rx0 addr
+    beken.WriteRegisterMulti((BK_WRITE_REG|BK_RX_ADDR_P1),RX1_Address,5); // REG 11 - Rx1 addr
+    beken.WriteRegisterMulti((BK_WRITE_REG|BK_TX_ADDR),TX_Address,5); // REG 16 - TX addr
 
 #if RADIO_BEKEN
-	i = beken.ReadReg(BK_FEATURE);
-	if (i == 0) // i!=0 showed that chip has been actived.so do not active again.
-		beken.WriteReg(BK_ACTIVATE_CMD,0x73);// Active
+    i = beken.ReadReg(BK_FEATURE);
+    if (i == 0) // i!=0 showed that chip has been actived.so do not active again.
+        beken.WriteReg(BK_ACTIVATE_CMD,0x73);// Active
 #endif
-	for (i = 22; i >= 21; i--)
-		beken.WriteReg((BK_WRITE_REG|Bank0_Reg[i][0]),Bank0_Reg[i][1]);
+    for (i = 22; i >= 21; i--)
+        beken.WriteReg((BK_WRITE_REG|Bank0_Reg[i][0]),Bank0_Reg[i][1]);
 
 #if RADIO_BEKEN
-	//********************Write Bank1 register******************
-	beken.SetRBank(1);
-	for (i = IREG1_4; i <= IREG1_13; i++)
-	{
-		const uint8_t* p = &Bank1_RegTable[spd][i][0];
-		uint8_t idx = *p++;
-		beken.WriteRegisterMulti((BK_WRITE_REG|idx), p, 4);
-	}
-	beken.WriteRegisterMulti((BK_WRITE_REG|BK2425_R1_14),&(Bank1_Reg14[0]),11);
+    //********************Write Bank1 register******************
+    beken.SetRBank(1);
+    for (i = IREG1_4; i <= IREG1_13; i++)
+    {
+        const uint8_t* p = &Bank1_RegTable[spd][i][0];
+        uint8_t idx = *p++;
+        beken.WriteRegisterMulti((BK_WRITE_REG|idx), p, 4);
+    }
+    beken.WriteRegisterMulti((BK_WRITE_REG|BK2425_R1_14),&(Bank1_Reg14[0]),11);
 
 //toggle REG4<25,26>
-	{
-		const uint8_t* p = &Bank1_RegTable[spd][IREG1_4A][0];
-		uint8_t idx = *p++;
-		beken.WriteRegisterMulti((BK_WRITE_REG|idx), p, 4);
-	}
-	{
-		const uint8_t* p = &Bank1_RegTable[spd][IREG1_4][0];
-		uint8_t idx = *p++;
-		beken.WriteRegisterMulti((BK_WRITE_REG|idx), p, 4);
-	}
+    {
+        const uint8_t* p = &Bank1_RegTable[spd][IREG1_4A][0];
+        uint8_t idx = *p++;
+        beken.WriteRegisterMulti((BK_WRITE_REG|idx), p, 4);
+    }
+    {
+        const uint8_t* p = &Bank1_RegTable[spd][IREG1_4][0];
+        uint8_t idx = *p++;
+        beken.WriteRegisterMulti((BK_WRITE_REG|idx), p, 4);
+    }
 
-	hal.scheduler->delay(100);//delay more than 50ms.
+    hal.scheduler->delay(100);//delay more than 50ms.
 
-	/********************switch back to Bank0 register access******************/
-	beken.SetRBank(0);
+    /********************switch back to Bank0 register access******************/
+    beken.SetRBank(0);
 #else
-	hal.scheduler->delay_microseconds(1000*100);
+    hal.scheduler->delay_microseconds(1000*100);
 #endif
-	beken.SwitchToRxMode(); // switch to RX mode
-	beken.bkReady = 1;
-	
+    beken.SwitchToRxMode(); // switch to RX mode
+    beken.bkReady = 1;
+    
     //beken.Reset();
     //for (uint8_t i=0; i<ARRAY_SIZE(radio_config); i++) {
     //    cc2500.WriteReg(radio_config[i].reg, radio_config[i].value);
